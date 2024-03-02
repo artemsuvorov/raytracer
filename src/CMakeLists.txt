@@ -1,8 +1,8 @@
 set(CMAKE_CXX_STANDARD 17)
 
-set(
-    SOURCES 
-    main.cpp
+aux_source_directory(
+    ./
+    SOURCES
 )
 
 add_executable(
