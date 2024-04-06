@@ -1,16 +1,11 @@
 #include "Precompiled.h"
-#include "Core.h"
+
+#include "Core/Application.h"
+#include "Editor/EditorLayer.h"
 
 int main(int argc, char** argv)
 {
-    using namespace Core;
-
-    Window window({"Ray Tracing Editor", 1200u, 800u});
-    GraphicsContext::LogInfo();
-
-    while (window.IsOpen())
-    {
-        Renderer::Clear(0x222222FF);
-        window.Update();
-    }
+    Core::Application app("Ray Tracing Editor");
+    app.PushLayer(new Editor::EditorLayer());
+    app.Start();
 }
