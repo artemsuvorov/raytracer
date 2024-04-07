@@ -1,5 +1,3 @@
-#include "Precompiled.h"
-
 #include "Core/Application.h"
 #include "Editor/EditorLayer.h"
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Precompiled.h"
 #include "Core/Layer.h"
 
 namespace Editor {

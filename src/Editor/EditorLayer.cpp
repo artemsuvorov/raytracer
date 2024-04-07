@@ -1,5 +1,6 @@
-#include "EditorLayer.h"
+#include "Precompiled.h"
 #include "Core/Core.h"
+#include "EditorLayer.h"
 
 #include <iostream>
 #include <array>
