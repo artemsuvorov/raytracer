@@ -14,8 +14,6 @@ public:
     static void Shutdown();
 
     static void Clear(Color color = Color::Black);
-
-    static void DrawTriangle();
 };
 
 }

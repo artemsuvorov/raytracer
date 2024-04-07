@@ -9,11 +9,13 @@ class EditorLayer final : public Core::Layer
 {
 public:
     virtual void OnAttach() override;
+    virtual void OnDetach() override;
     virtual void OnUpdate() override;
 
 private:
-    uint32_t m_BaseClearColor = 0x000000FFu;
-    uint32_t m_BlueColorDelta = 0u;
+    uint32_t m_VertexBuffer = 0;
+    uint32_t m_VertexArray = 0;
+    uint32_t m_ShaderProgram = 0;
 };
 
 }

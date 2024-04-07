@@ -35,7 +35,9 @@ Application& Application::Get()
 
 void Application::PushLayer(Layer* layer)
 {
+    assert(layer);
     m_LayerStack.emplace_back(layer);
+    layer->OnAttach();
 }
 
 void Application::Start()
