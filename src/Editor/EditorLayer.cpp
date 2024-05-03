@@ -1,5 +1,6 @@
 #include "Precompiled.h"
-#include "Core/Core.h"
+#include "Renderer/Renderer.h"
+#include "Renderer/Shader.h"
 #include "EditorLayer.h"
 
 #include <iostream>
@@ -9,63 +10,9 @@
 using namespace Core;
 using namespace Editor;
 
-static constexpr const char* GVertexShaderSource = 
-    "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\0";
-
-static constexpr const char* GFragmentShaderSource = 
-    "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}\n\0";
-
 void EditorLayer::OnAttach()
 {
-    // build and compile our shader program
-    // ------------------------------------
-    // vertex shader
-    uint32_t vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &GVertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-    // check for shader compile errors
-    int32_t success;
-    char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << "\n";
-    }
-    // fragment shader
-    uint32_t fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &GFragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-    // check for shader compile errors
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-    // link shaders
-    m_ShaderProgram = glCreateProgram();
-    glAttachShader(m_ShaderProgram, vertexShader);
-    glAttachShader(m_ShaderProgram, fragmentShader);
-    glLinkProgram(m_ShaderProgram);
-    // check for linking errors
-    glGetProgramiv(m_ShaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(m_ShaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-    }
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    m_Shader = Shader::Create("res/shader.vert", "res/shader.frag");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -105,7 +52,7 @@ void Editor::EditorLayer::OnDetach()
 {
     glDeleteVertexArrays(1, &m_VertexArray);
     glDeleteBuffers(1, &m_VertexBuffer);
-    glDeleteProgram(m_ShaderProgram);
+    // glDeleteProgram(m_ShaderProgram);
 }
 
 void EditorLayer::OnUpdate()
@@ -113,7 +60,7 @@ void EditorLayer::OnUpdate()
     Renderer::Clear(0x222222FF);
     
     // draw our first triangle
-    glUseProgram(m_ShaderProgram);
+    m_Shader->Bind();
     // seeing as we only have a single VAO there's no need to bind it every time,
     // but we'll do so to keep things a bit more organized
     glBindVertexArray(m_VertexArray);

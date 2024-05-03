@@ -24,12 +24,15 @@ Now, the project can be built and compiled into an executable file using `CMake`
 
 ```sh
 cmake -S . -B build
-make -C . build
+cd build && make && cd ..
 ```
 Also, might need to install:
 ```sh 
 sudo apt-get install libgl1-mesa-dev
+sudo apt install libwayland-dev libxkbcommon-dev xorg-dev
 ```
+
+You can check out other dependencies for Linux [here](https://www.glfw.org/docs/latest/compile_guide.html#compile_deps).
 
 ### Windows
 

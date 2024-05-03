@@ -1,5 +1,4 @@
 #include "Precompiled.h"
-#include "Color.h"
 #include "Renderer.h"
 
 #include <GLFW/glfw3.h>

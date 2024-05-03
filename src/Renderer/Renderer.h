@@ -1,9 +1,8 @@
 #pragma once
 
+#include "Core/Color.h"
+
 namespace Core {
-    
-// Forwards.
-union Color;
 
 // Default graphics renderer class that contains wrapper functions
 // around OpenGL specification.

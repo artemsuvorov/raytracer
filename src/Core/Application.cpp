@@ -1,5 +1,10 @@
 #include "Application.h"
-#include "Core.h"
+
+#include "Color.h"
+#include "Window.h"
+#include "Layer.h"
+
+#include "Renderer/Renderer.h"
 
 using namespace Core;
 
