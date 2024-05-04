@@ -21,7 +21,10 @@ public:
 private:
     uint32_t m_VertexBuffer = 0;
     uint32_t m_VertexArray = 0;
-    std::shared_ptr<Core::Shader> m_Shader;
+    uint32_t m_Texture = 0;
+    std::shared_ptr<Core::Shader> m_ScreenShader;
+    std::shared_ptr<Core::Shader> m_ComputeShader;
+    // uint32_t m_ComputeShader = 0;
 };
 
 }

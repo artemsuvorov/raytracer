@@ -8,17 +8,13 @@
 
 using namespace Core;
 
-std::shared_ptr<Shader> Shader::Create(const std::string& vertexFilepath, const std::string& fragmentFilepath)
+ShaderBuilder Shader::Create()
 {
-    return std::make_shared<Shader>(vertexFilepath, fragmentFilepath);
+    return ShaderBuilder();
 }
 
-Shader::Shader(const std::string& vertexFilepath, const std::string& fragmentFilepath)
+Core::Shader::Shader(uint32_t id) : m_Id(id)
 {
-    const std::string vertexSource = ReadShader(vertexFilepath);
-    const std::string fragmentSource = ReadShader(fragmentFilepath);
-
-    m_Id = CreateProgram(vertexSource, fragmentSource);
 }
 
 Shader::~Shader()
@@ -36,7 +32,85 @@ void Shader::Unbind() const
     glUseProgram(0);
 }
 
-std::string Shader::ReadShader(const std::string& filepath)
+void Shader::SetUniform(const std::string& name, int32_t value)
+{
+    const uint32_t location = glGetUniformLocation(m_Id, name.c_str());
+    glUniform1i(location, value);
+}
+
+void Shader::SetUniform(const std::string& name, float value)
+{
+    const uint32_t location = glGetUniformLocation(m_Id, name.c_str());
+    glUniform1f(location, value);
+}
+
+static uint32_t ShaderTypeToEnum(ShaderType type)
+{
+    switch (type)
+    {
+        default:
+            assert(false && "Unexpected shader type.");
+            return 0;
+
+        case ShaderType::kVertexShader:     return GL_VERTEX_SHADER;
+        case ShaderType::kFragmentShader:   return GL_FRAGMENT_SHADER;
+        case ShaderType::kComputeShader:    return GL_COMPUTE_SHADER;
+    }
+}
+
+static void PrintCompilationErrors(uint32_t shader)
+{
+    int32_t compiled;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+    if (compiled)
+        return;
+    
+    int32_t length;
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
+    char* message = (char*)alloca(length * sizeof(char));
+    glGetShaderInfoLog(shader, length, &length, message);
+    std::cerr << "Shader::CompileShader: Compilation failed:\n" << message << "\n";
+}
+
+static void PrintLinkingErrors(uint32_t program)
+{
+    int32_t linked;
+    glGetProgramiv(program, GL_LINK_STATUS, &linked);
+    if (linked)
+        return;
+
+    std::cerr << "Shader::LinkShaders: Shader linking failed for the program " << program << ".\n";
+}
+
+ShaderBuilder::ShaderBuilder()
+{
+    m_ProgramId = glCreateProgram();
+}
+
+ShaderBuilder& ShaderBuilder::Attach(ShaderType type, const std::string& filepath)
+{
+    const std::string source = ReadShader(filepath);
+    const uint32_t shader = CompileShader(type, source);
+
+    glAttachShader(m_ProgramId, shader);
+    m_AttachedShaders.push_back(shader);
+
+    return *this;
+}
+
+std::shared_ptr<Shader> ShaderBuilder::Link()
+{
+    glLinkProgram(m_ProgramId);
+    PrintLinkingErrors(m_ProgramId);
+    glValidateProgram(m_ProgramId);
+
+    for (const uint32_t shader : m_AttachedShaders)
+        glDeleteShader(shader);
+
+    return std::make_shared<Shader>(m_ProgramId);
+}
+
+std::string ShaderBuilder::ReadShader(const std::string& filepath)
 {
     std::string result;
     
@@ -63,60 +137,15 @@ std::string Shader::ReadShader(const std::string& filepath)
     return result;
 }
 
-static void PrintLinkingErrors(uint32_t program)
+uint32_t ShaderBuilder::CompileShader(ShaderType type, const std::string& source)
 {
-    int32_t linked;
-    glGetProgramiv(program, GL_LINK_STATUS, &linked);
-    if (linked)
-        return;
-
-    std::cerr << "Shader::LinkShaders: Shader linking failed for the program " << program << ".\n";
-}
-
-uint32_t Shader::CreateProgram(const std::string& vertexSource, const std::string& fragmentSource)
-{
-    const uint32_t program = glCreateProgram();
-
-    const uint32_t vertexShaderId = CompileShader(GL_VERTEX_SHADER, vertexSource);
-    const uint32_t fragmentShaderId = CompileShader(GL_FRAGMENT_SHADER, fragmentSource);
-    
-    glAttachShader(program, vertexShaderId);
-    glAttachShader(program, fragmentShaderId);
-    glLinkProgram(program);
-
-    PrintLinkingErrors(program);
-
-    glValidateProgram(program);
-
-    glDeleteShader(vertexShaderId);
-    glDeleteShader(fragmentShaderId);
-
-    return program;
-}
-
-static void PrintCompilationErrors(uint32_t type, uint32_t shader)
-{
-    int32_t compiled;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-    if (compiled)
-        return;
-    
-    int32_t length;
-    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
-    char* message = (char*)alloca(length * sizeof(char));
-    glGetShaderInfoLog(shader, length, &length, message);
-    std::cerr << "Shader::CompileShader: Compilation failed:\n" << message << "\n";
-}
-
-uint32_t Shader::CompileShader(uint32_t type, const std::string& source)
-{
-    const uint32_t id = glCreateShader(type);
+    const uint32_t id = glCreateShader(ShaderTypeToEnum(type));
     const char* sourcePointer = source.c_str();
 
     glShaderSource(id, 1, &sourcePointer, nullptr);
     glCompileShader(id);
 
-    PrintCompilationErrors(type, id);
+    PrintCompilationErrors(id);
 
     return id;
 }

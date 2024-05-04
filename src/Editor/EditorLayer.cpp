@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <array>
+#include <math.h>
 #include <GL/glew.h>
 
 using namespace Core;
@@ -12,58 +13,77 @@ using namespace Editor;
 
 void EditorLayer::OnAttach()
 {
-    m_Shader = Shader::Create("res/shader.vert", "res/shader.frag");
+    GLfloat vertices[] =
+    {
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+         1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+         1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+    };
 
-    // set up vertex data (and buffer(s)) and configure vertex attributes
-    // ------------------------------------------------------------------
-    float vertices[] = {
-        -0.5f, -0.5f,  0.0f,  // left  
-         0.5f, -0.5f,  0.0f,  // right 
-         0.0f,  0.5f,  0.0f   // top   
-    }; 
+    GLuint indices[] =
+    {
+        0, 2, 1,
+        0, 3, 2
+    };
 
-    glGenVertexArrays(1, &m_VertexArray);
-    glGenBuffers(1, &m_VertexBuffer);
-    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then 
-    // configure vertex attributes(s).
-    glBindVertexArray(m_VertexArray);
+    uint32_t EBO;
+	glCreateVertexArrays(1, &m_VertexArray);
+	glCreateBuffers(1, &m_VertexBuffer);
+	glCreateBuffers(1, &EBO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glNamedBufferData(m_VertexBuffer, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glNamedBufferData(EBO, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+	glEnableVertexArrayAttrib(m_VertexArray, 0);
+	glVertexArrayAttribBinding(m_VertexArray, 0, 0);
+	glVertexArrayAttribFormat(m_VertexArray, 0, 3, GL_FLOAT, GL_FALSE, 0);
 
-    // note that this is allowed, the call to glVertexAttribPointer registered VBO as 
-    // the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-    glBindBuffer(GL_ARRAY_BUFFER, 0); 
+	glEnableVertexArrayAttrib(m_VertexArray, 1);
+	glVertexArrayAttribBinding(m_VertexArray, 1, 0);
+	glVertexArrayAttribFormat(m_VertexArray, 1, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat));
 
-    // You can unbind the VAO afterwards so other VAO calls won't accidentally modify 
-    // this VAO, but this rarely happens. Modifying other VAOs requires a call to 
-    // glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when 
-    // it's not directly necessary.
-    glBindVertexArray(0);
+	glVertexArrayVertexBuffer(m_VertexArray, 0, m_VertexBuffer, 0, 5 * sizeof(GLfloat));
+	glVertexArrayElementBuffer(m_VertexArray, EBO);
 
-    // uncomment this call to draw in wireframe polygons.
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // Texture.
+	glCreateTextures(GL_TEXTURE_2D, 1, &m_Texture);
+	glTextureParameteri(m_Texture, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTextureParameteri(m_Texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTextureParameteri(m_Texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTextureParameteri(m_Texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTextureStorage2D(m_Texture, 1, GL_RGBA32F, 1200, 800);
+	glBindImageTexture(0, m_Texture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+
+    m_ScreenShader = Shader::Create()
+        .Attach(ShaderType::kVertexShader, "res/shader.vert")
+        .Attach(ShaderType::kFragmentShader, "res/shader.frag")
+        .Link();
+
+    m_ComputeShader = Shader::Create()
+        .Attach(ShaderType::kComputeShader, "res/tracing.comp")
+        .Link();
 }
 
 void Editor::EditorLayer::OnDetach()
 {
     glDeleteVertexArrays(1, &m_VertexArray);
     glDeleteBuffers(1, &m_VertexBuffer);
-    // glDeleteProgram(m_ShaderProgram);
 }
 
 void EditorLayer::OnUpdate()
 {
     Renderer::Clear(0x222222FF);
     
-    // draw our first triangle
-    m_Shader->Bind();
-    // seeing as we only have a single VAO there's no need to bind it every time,
-    // but we'll do so to keep things a bit more organized
+    m_ComputeShader->Bind();
+    glDispatchCompute(ceil(1200 / 8), ceil(800 / 4), 1);
+    glMemoryBarrier(GL_ALL_BARRIER_BITS);
+
+    m_ScreenShader->Bind();
+    m_ScreenShader->SetUniform("screen", 0);
+
+    glBindTextureUnit(0, m_Texture);
+
     glBindVertexArray(m_VertexArray);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    // glBindVertexArray(0); // no need to unbind it every time 
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
