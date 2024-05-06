@@ -13,7 +13,7 @@ ShaderBuilder Shader::Create()
     return ShaderBuilder();
 }
 
-Core::Shader::Shader(uint32_t id) : m_Id(id)
+Shader::Shader(uint32_t id) : m_Id(id)
 {
 }
 

@@ -5,6 +5,8 @@
 #include "Core/Window.h"
 
 #include "Renderer/Renderer.h"
+#include "Renderer/Buffer.h"
+#include "Renderer/VertexArray.h"
 #include "Renderer/Shader.h"
 #include "Renderer/Texture.h"
 
@@ -24,36 +26,22 @@ void EditorLayer::OnAttach()
 {
     const float vertices[] =
     {
-        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-        -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-         1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-         1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        // XYZ Position      // UV
+        -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
+         1.0f,  1.0f, 0.0f,  1.0f, 1.0f,
+         1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
     };
 
-    const uint32_t indices[] =
-    {
-        0, 2, 1,
-        0, 3, 2,
-    };
+    const uint32_t indices[] = { 0, 2, 1, 0, 3, 2, };
 
-    uint32_t EBO;
-	glCreateVertexArrays(1, &m_VertexArray);
-	glCreateBuffers(1, &m_VertexBuffer);
-	glCreateBuffers(1, &EBO);
-
-	glNamedBufferData(m_VertexBuffer, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	glNamedBufferData(EBO, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	glEnableVertexArrayAttrib(m_VertexArray, 0);
-	glVertexArrayAttribBinding(m_VertexArray, 0, 0);
-	glVertexArrayAttribFormat(m_VertexArray, 0, 3, GL_FLOAT, GL_FALSE, 0);
-
-	glEnableVertexArrayAttrib(m_VertexArray, 1);
-	glVertexArrayAttribBinding(m_VertexArray, 1, 0);
-	glVertexArrayAttribFormat(m_VertexArray, 1, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat));
-
-	glVertexArrayVertexBuffer(m_VertexArray, 0, m_VertexBuffer, 0, 5 * sizeof(GLfloat));
-	glVertexArrayElementBuffer(m_VertexArray, EBO);
+    const auto vertexBuffer = VertexBuffer::Create(vertices, sizeof(vertices));
+    const auto indexBuffer = IndexBuffer::Create(indices, sizeof(indices));
+    const BufferLayout layout = {
+		{ ShaderDataType::Float3, "pos" },
+		{ ShaderDataType::Float2, "uvs" },
+	};
+    m_VertexArray = VertexArray::Create(layout, vertexBuffer, indexBuffer);
 
     // Texture.
     m_Texture = Texture::Create()
@@ -74,26 +62,20 @@ void EditorLayer::OnAttach()
         .Link();
 }
 
-void EditorLayer::OnDetach()
-{
-    glDeleteVertexArrays(1, &m_VertexArray);
-    glDeleteBuffers(1, &m_VertexBuffer);
-}
-
 void EditorLayer::OnUpdate()
 {
     Renderer::Clear(0x222222FF);
     
     m_ComputeShader->Bind();
-    const glm::vec2 viewportSize = m_Window.GetSize();
-    glDispatchCompute(ceil(viewportSize.x / 8), ceil(viewportSize.y / 4), 1);
-    glMemoryBarrier(GL_ALL_BARRIER_BITS);
+    glDispatchCompute(ceil(m_Window.GetSize().x / 8), ceil(m_Window.GetSize().y / 4), 1);
+    // glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
     m_ScreenShader->Bind();
     m_ScreenShader->SetUniform("screen", 0);
 
     m_Texture->Bind(0);    
 
-    glBindVertexArray(m_VertexArray);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    m_VertexArray->Bind();
+    const uint32_t count = m_VertexArray->GetIndexBuffer()->GetCount();
+    glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
 }
