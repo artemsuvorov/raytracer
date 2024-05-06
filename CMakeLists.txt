@@ -10,6 +10,7 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(lib/glew)
 add_subdirectory(lib/glfw)
+add_subdirectory(lib/glm)
 add_subdirectory(src)
 
 include_directories(lib/glew/include)
@@ -22,6 +23,7 @@ target_link_libraries(
     glfw
     ${OPENGL_gl_LIBRARY}
     ${GLFW_LIBRARIES}
+    glm::glm
 )
 
 find_package(OpenGL REQUIRED)

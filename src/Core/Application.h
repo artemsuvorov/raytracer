@@ -18,9 +18,10 @@ public:
 public:
     static Application& Get();
 
-public:
     void PushLayer(Layer* layer);
     void Start();
+
+    const Window& GetWindow() const { return *m_Window; }
 
 private:
     std::unique_ptr<Window> m_Window;

@@ -23,12 +23,15 @@ public:
 	bool IsOpen() const;
 	void Update();
 
+	glm::vec2 GetSize() const { return m_Size; }
+
 private:
 	void Init(const WindowParams& params);
 	void Shutdown();
 
 private:
 	GLFWwindow* m_Handle = nullptr;
+	glm::vec2 m_Size = glm::vec2(0.0f);
 };
 
 }

@@ -1,7 +1,11 @@
 #include "Precompiled.h"
+#include "EditorLayer.h"
+
+#include "Core/Application.h"
+#include "Core/Window.h"
+
 #include "Renderer/Renderer.h"
 #include "Renderer/Shader.h"
-#include "EditorLayer.h"
 
 #include <iostream>
 #include <array>
@@ -11,9 +15,13 @@
 using namespace Core;
 using namespace Editor;
 
+Editor::EditorLayer::EditorLayer() : m_Window(Application::Get().GetWindow())
+{
+}
+
 void EditorLayer::OnAttach()
 {
-    GLfloat vertices[] =
+    const float vertices[] =
     {
         -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
         -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
@@ -21,10 +29,10 @@ void EditorLayer::OnAttach()
          1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
     };
 
-    GLuint indices[] =
+    const uint32_t indices[] =
     {
         0, 2, 1,
-        0, 3, 2
+        0, 3, 2,
     };
 
     uint32_t EBO;
@@ -47,12 +55,13 @@ void EditorLayer::OnAttach()
 	glVertexArrayElementBuffer(m_VertexArray, EBO);
 
     // Texture.
+    const glm::vec2 viewportSize = m_Window.GetSize();
 	glCreateTextures(GL_TEXTURE_2D, 1, &m_Texture);
 	glTextureParameteri(m_Texture, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTextureParameteri(m_Texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTextureParameteri(m_Texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTextureParameteri(m_Texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTextureStorage2D(m_Texture, 1, GL_RGBA32F, 1200, 800);
+	glTextureStorage2D(m_Texture, 1, GL_RGBA32F, viewportSize.x, viewportSize.y);
 	glBindImageTexture(0, m_Texture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
     m_ScreenShader = Shader::Create()
@@ -65,7 +74,7 @@ void EditorLayer::OnAttach()
         .Link();
 }
 
-void Editor::EditorLayer::OnDetach()
+void EditorLayer::OnDetach()
 {
     glDeleteVertexArrays(1, &m_VertexArray);
     glDeleteBuffers(1, &m_VertexBuffer);
@@ -76,7 +85,8 @@ void EditorLayer::OnUpdate()
     Renderer::Clear(0x222222FF);
     
     m_ComputeShader->Bind();
-    glDispatchCompute(ceil(1200 / 8), ceil(800 / 4), 1);
+    const glm::vec2 viewportSize = m_Window.GetSize();
+    glDispatchCompute(ceil(viewportSize.x / 8), ceil(viewportSize.y / 4), 1);
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
     m_ScreenShader->Bind();

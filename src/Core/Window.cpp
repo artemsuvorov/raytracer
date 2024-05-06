@@ -10,7 +10,7 @@ using namespace Core;
 
 static uint8_t s_WindowCount = 0u;
 
-Window::Window(const WindowParams& params)
+Window::Window(const WindowParams& params) : m_Size(params.Width, params.Height)
 {
     Init(params);
 }

@@ -42,7 +42,6 @@ namespace Core {
 
     private:
         std::string ReadShader(const std::string& filepath);
-        uint32_t CreateProgram(const std::string& vertexSource, const std::string& fragmentSource);
         uint32_t CompileShader(ShaderType type, const std::string& source);
 
     private:
