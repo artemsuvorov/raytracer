@@ -6,6 +6,7 @@
 
 #include "Renderer/Renderer.h"
 #include "Renderer/Shader.h"
+#include "Renderer/Texture.h"
 
 #include <iostream>
 #include <array>
@@ -55,14 +56,13 @@ void EditorLayer::OnAttach()
 	glVertexArrayElementBuffer(m_VertexArray, EBO);
 
     // Texture.
-    const glm::vec2 viewportSize = m_Window.GetSize();
-	glCreateTextures(GL_TEXTURE_2D, 1, &m_Texture);
-	glTextureParameteri(m_Texture, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTextureParameteri(m_Texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTextureParameteri(m_Texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTextureParameteri(m_Texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTextureStorage2D(m_Texture, 1, GL_RGBA32F, viewportSize.x, viewportSize.y);
-	glBindImageTexture(0, m_Texture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+    m_Texture = Texture::Create()
+        .WithSize(m_Window.GetSize().x, m_Window.GetSize().y)
+        .WithFormat(ImageFormat::kRgba32f)
+        .WithFilter(ImageFilter::kNearest)
+        .WithWrapping(TextureWrap::kClampToEdge)
+        .Build();
+    m_Texture->BindWriteLevel();
 
     m_ScreenShader = Shader::Create()
         .Attach(ShaderType::kVertexShader, "res/shader.vert")
@@ -92,7 +92,7 @@ void EditorLayer::OnUpdate()
     m_ScreenShader->Bind();
     m_ScreenShader->SetUniform("screen", 0);
 
-    glBindTextureUnit(0, m_Texture);
+    m_Texture->Bind(0);    
 
     glBindVertexArray(m_VertexArray);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

@@ -8,6 +8,7 @@ namespace Core {
     // Forwards.
     class Window;
     class Shader;
+    class Texture;
 
 }
 
@@ -25,12 +26,14 @@ public:
 
 private:
     const Core::Window& m_Window;
+    
+    std::shared_ptr<Core::Shader> m_ScreenShader;
+    std::shared_ptr<Core::Shader> m_ComputeShader;
+
+    std::shared_ptr<Core::Texture> m_Texture = 0;
 
     uint32_t m_VertexBuffer = 0;
     uint32_t m_VertexArray = 0;
-    uint32_t m_Texture = 0;
-    std::shared_ptr<Core::Shader> m_ScreenShader;
-    std::shared_ptr<Core::Shader> m_ComputeShader;
 };
 
 }
