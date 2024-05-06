@@ -10,10 +10,7 @@
 #include "Renderer/Shader.h"
 #include "Renderer/Texture.h"
 
-#include <iostream>
-#include <array>
 #include <math.h>
-#include <GL/glew.h>
 
 using namespace Core;
 using namespace Editor;
@@ -67,15 +64,12 @@ void EditorLayer::OnUpdate()
     Renderer::Clear(0x222222FF);
     
     m_ComputeShader->Bind();
-    glDispatchCompute(ceil(m_Window.GetSize().x / 8), ceil(m_Window.GetSize().y / 4), 1);
-    // glMemoryBarrier(GL_ALL_BARRIER_BITS);
+    Renderer::DispatchCompute(ceil(m_Window.GetSize().x / 8), ceil(m_Window.GetSize().y / 4));
 
     m_ScreenShader->Bind();
     m_ScreenShader->SetUniform("screen", 0);
 
     m_Texture->Bind(0);    
 
-    m_VertexArray->Bind();
-    const uint32_t count = m_VertexArray->GetIndexBuffer()->GetCount();
-    glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
+    Renderer::DrawIndexed(m_VertexArray);
 }
