@@ -21,26 +21,20 @@ Editor::EditorLayer::EditorLayer() : m_Window(Application::Get().GetWindow())
 
 void EditorLayer::OnAttach()
 {
-    const float vertices[] =
-    {
+    const auto vertexBuffer = VertexBuffer::Create({
         // XYZ Position      // UV
         -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
         -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
          1.0f,  1.0f, 0.0f,  1.0f, 1.0f,
          1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-    };
-
-    const uint32_t indices[] = { 0, 2, 1, 0, 3, 2, };
-
-    const auto vertexBuffer = VertexBuffer::Create(vertices, sizeof(vertices));
-    const auto indexBuffer = IndexBuffer::Create(indices, sizeof(indices));
+    });
+    const auto indexBuffer = IndexBuffer::Create({ 0, 2, 1, 0, 3, 2, });
     const BufferLayout layout = {
 		{ ShaderDataType::Float3, "pos" },
 		{ ShaderDataType::Float2, "uvs" },
 	};
     m_VertexArray = VertexArray::Create(layout, vertexBuffer, indexBuffer);
 
-    // Texture.
     m_Texture = Texture::Create()
         .WithSize(m_Window.GetSize().x, m_Window.GetSize().y)
         .WithFormat(ImageFormat::kRgba32f)

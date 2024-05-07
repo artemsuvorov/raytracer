@@ -5,12 +5,17 @@
 
 using namespace Core;
 
+std::shared_ptr<VertexBuffer> Core::VertexBuffer::Create(std::initializer_list<float> vertices)
+{
+    return Create(vertices.begin(), vertices.size() * sizeof(vertices.begin()));
+}
+
 std::shared_ptr<VertexBuffer> VertexBuffer::Create(const float* vertices, uint32_t size)
 {
     return std::make_shared<VertexBuffer>(vertices, size);
 }
 
-VertexBuffer::VertexBuffer(const float *vertices, uint32_t size)
+VertexBuffer::VertexBuffer(const float* vertices, uint32_t size)
 {
     glCreateBuffers(1, &m_Id);
 	glNamedBufferData(m_Id, size, vertices, GL_STATIC_DRAW);
@@ -31,7 +36,12 @@ void VertexBuffer::Unbind() const
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-std::shared_ptr<IndexBuffer> IndexBuffer::Create(const uint32_t* indices, uint32_t size)
+std::shared_ptr<IndexBuffer> Core::IndexBuffer::Create(std::initializer_list<uint32_t> indices)
+{
+    return Create(indices.begin(), indices.size() * sizeof(indices.begin()));
+}
+
+std::shared_ptr<IndexBuffer> IndexBuffer::Create(const uint32_t *indices, uint32_t size)
 {
     return std::make_shared<IndexBuffer>(indices, size);
 }

@@ -5,6 +5,7 @@ namespace Core {
 class VertexBuffer final
 {
 public:
+    static std::shared_ptr<VertexBuffer> Create(std::initializer_list<float> vertices);
     static std::shared_ptr<VertexBuffer> Create(const float* vertices, uint32_t size);
 
     VertexBuffer(const float* vertices, uint32_t size);
@@ -22,6 +23,7 @@ private:
 class IndexBuffer final
 {
 public:
+    static std::shared_ptr<IndexBuffer> Create(std::initializer_list<uint32_t> indices);
     static std::shared_ptr<IndexBuffer> Create(const uint32_t* indices, uint32_t size);
 
     IndexBuffer(const uint32_t* indices, uint32_t size);
