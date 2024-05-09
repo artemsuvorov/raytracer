@@ -66,3 +66,26 @@ void IndexBuffer::Unbind() const
 {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
+
+std::shared_ptr<UniformBuffer> UniformBuffer::Create(const void* data, uint32_t size)
+{
+    return std::make_shared<UniformBuffer>(data, size);
+}
+
+UniformBuffer::UniformBuffer(const void* data, uint32_t size)
+{
+    glGenBuffers(1, &m_Id);
+    glBindBuffer(GL_UNIFORM_BUFFER, m_Id);
+    glBufferData(GL_UNIFORM_BUFFER, size, data, GL_STATIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+UniformBuffer::~UniformBuffer()
+{
+    glDeleteBuffers(1, &m_Id);
+}
+
+void UniformBuffer::SetBinding(uint32_t bindingIndex) const
+{
+    glBindBufferBase(GL_UNIFORM_BUFFER, bindingIndex, m_Id);
+}

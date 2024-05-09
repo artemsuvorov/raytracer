@@ -41,6 +41,20 @@ private:
     friend class VertexArray;
 };
 
+class UniformBuffer final
+{
+public:
+    static std::shared_ptr<UniformBuffer> Create(const void* data, uint32_t size);
+
+    UniformBuffer(const void* data, uint32_t size);
+    ~UniformBuffer();
+
+    void SetBinding(uint32_t bindingIndex) const;
+
+private:
+    uint32_t m_Id = 0;
+};
+
 enum class ShaderDataType
 {
     None = 0, Float, Float2, Float3, Float4, Mat3, Mat4, Int, Int2, Int3, Int4, Bool

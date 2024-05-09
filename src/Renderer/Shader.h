@@ -25,6 +25,8 @@ public:
     void SetUniform(const std::string& name, const glm::mat4& value);
 
 private:
+    int32_t FindUniform(const std::string& name);
+
     uint32_t m_Id;
 };
 

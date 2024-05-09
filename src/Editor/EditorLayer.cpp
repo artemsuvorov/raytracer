@@ -15,13 +15,30 @@
 
 #include <math.h>
 #include <iostream>
-#include <GLFW/glfw3.h>
+#include <GL/glew.h>
 
 using namespace Core;
 using namespace Editor;
 
 EditorLayer::EditorLayer() : m_Window(Application::Get().GetWindow())
 {
+    Sphere sphere1;
+    sphere1.Position = glm::vec3(0.5f, -0.5f, 0.0f);
+    sphere1.Radius = 0.5f;
+    sphere1.Albedo = glm::vec3(1.0f, 0.0f, 0.0f);
+    m_Scene.Spheres.push_back(sphere1);
+
+    Sphere sphere2;
+    sphere2.Position = glm::vec3(-2.0f, 0.0f, -3.0f);
+    sphere2.Radius = 2.0f;
+    sphere2.Albedo = glm::vec3(0.0f, 0.0f, 1.0f);
+    m_Scene.Spheres.push_back(sphere2);
+
+    Sphere sphere3;
+    sphere3.Position = glm::vec3(1.5f, 1.0f, -2.0f);
+    sphere3.Radius = 1.0f;
+    sphere3.Albedo = glm::vec3(0.0f, 1.0f, 0.0f);
+    m_Scene.Spheres.push_back(sphere3);
 }
 
 void EditorLayer::OnAttach()
@@ -56,20 +73,23 @@ void EditorLayer::OnAttach()
     m_ComputeShader = Shader::Create()
         .Attach(ShaderType::kComputeShader, "res/tracing.comp")
         .Link();
+
+    m_SceneBuffer = UniformBuffer::Create(&m_Scene.Spheres.front(), sizeof(Sphere) * m_Scene.Spheres.size());
+    m_SceneBuffer->SetBinding(1);
 }
 
 void EditorLayer::OnUpdate()
 {
     Renderer::Clear(0x222222FF);
-    
+
     m_ComputeShader->Bind();
-    m_ComputeShader->SetUniform("u_Camera", m_CameraPosition);
+    m_ComputeShader->SetUniform("u_CameraPosition", m_CameraPosition);
     Renderer::DispatchCompute(ceil(m_Window.GetSize().x / 8), ceil(m_Window.GetSize().y / 4));
 
     m_ScreenShader->Bind();
     m_ScreenShader->SetUniform("screen", 0u);
 
-    m_Texture->Bind(0);    
+    m_Texture->Bind(0);
 
     Renderer::DrawIndexed(m_VertexArray);
 }
@@ -87,11 +107,11 @@ bool EditorLayer::OnKeyPressed(KeyPressedEvent& event)
 
     const KeyCode keycode = event.GetKeyCode();
     direction.z = (keycode == Key::W) - (keycode == Key::S);
-    direction.x = (keycode == Key::D) - (keycode == Key::A);
-    direction.y = (keycode == Key::Space) - (keycode == Key::LeftShift);
+    direction.x = (keycode == Key::A) - (keycode == Key::D);
+    direction.y = (keycode == Key::LeftShift) - (keycode == Key::Space);
 
     if (glm::dot(direction, direction) > 0e-25f)
-        direction = glm::normalize(direction);
+        direction = -1.0f * glm::normalize(direction);
 
     constexpr static const float kSpeed = 0.05f;
     m_CameraPosition += kSpeed * direction;

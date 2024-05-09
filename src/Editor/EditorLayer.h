@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Layer.h"
+#include "Editor/Scene.h"
 
 namespace Core {
 
@@ -9,6 +10,7 @@ namespace Core {
     class VertexArray;
     class Shader;
     class Texture;
+    class UniformBuffer;
 
     class Event;
     class KeyPressedEvent;
@@ -34,11 +36,13 @@ private:
 
 private:
     const Core::Window& m_Window;
+    Scene m_Scene;
 
-    glm::vec3 m_CameraPosition = glm::vec3(0.0f);
+    glm::vec3 m_CameraPosition {0.0f, 0.0f, 1.0f};
 
     std::shared_ptr<Core::VertexArray> m_VertexArray;
-    
+    std::shared_ptr<Core::UniformBuffer> m_SceneBuffer;
+
     std::shared_ptr<Core::Shader> m_ScreenShader;
     std::shared_ptr<Core::Shader> m_ComputeShader;
 

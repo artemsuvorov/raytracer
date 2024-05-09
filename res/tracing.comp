@@ -3,40 +3,84 @@
 layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
 layout(rgba32f, binding = 0) uniform image2D screen;
 
-uniform vec3 u_Camera;
+#define MAX_DIST 1000.0
+#define MAX_SIZE 16
 
-vec4 trace_sphere(vec2 uv)
+struct Ray
 {
-    vec3 ray_origin = vec3(0.0, 0.0, 1.0) - u_Camera;
-    vec3 ray_direction = normalize(vec3(uv, -1.0));
-    float radius = 0.5;
-        
-    float a = dot(ray_direction, ray_direction);
-    float b = 2.0 * dot(ray_origin, ray_direction);
-    float c = dot(ray_origin, ray_origin) - radius * radius;
+    vec3 origin, direction;
+};
+
+struct Sphere
+{
+    vec3 origin;
+    float radius;
+    vec3 albedo;
+};
+
+struct Hit
+{
+    float dist;
+    vec3 position;
+};
+
+uniform vec3 u_CameraPosition;
+
+layout (std140, binding = 1) uniform u_SphereBlock {
+    Sphere spheres[MAX_SIZE];
+};
+
+Hit intersect_sphere(Ray ray, Sphere sphere)
+{
+    vec3 origin = ray.origin - sphere.origin;
+    float radius = sphere.radius;
+    
+    float a = dot(ray.direction, ray.direction);
+    float b = 2.0 * dot(origin, ray.direction);
+    float c = dot(origin, origin) - radius * radius;
     
     float discriminant = b * b - 4.0 * a * c;
     if (discriminant < 0.0)
-        return vec4(0.0);
+        return Hit(MAX_DIST, vec3(0.0));
     
-    float t1 = (-b - sqrt(discriminant)) / (2.0 * a);
-    vec3 hit_position = ray_origin + ray_direction * t1;
-    vec3 normal = normalize(hit_position);
+    float hit_dist = (-b - sqrt(discriminant)) / (2.0 * a);
+    vec3 hit_position = origin + ray.direction * hit_dist;
+    return Hit(hit_dist, hit_position);
+}
+
+vec3 trace_ray(Ray ray)
+{
+    float min_dist = MAX_DIST;
+    vec3 color = vec3(0.0);
     
-    vec3 light_direction = normalize(vec3(-1.0, -1.0, -1.0));
-    float cos_angle = dot(normal, -light_direction);
+    for (int i = 0; i < MAX_SIZE; i++)
+    {
+        Sphere sphere = spheres[i];
+        Hit hit = intersect_sphere(ray, sphere);
+        if (hit.dist >= min_dist)
+            continue;
+
+        vec3 hit_normal = normalize(hit.position);
+        vec3 light_direction = normalize(vec3(-1.0, -1.0, -1.0));
+        float cos_angle = dot(hit_normal, -light_direction);
+        color = sphere.albedo * cos_angle;
+        min_dist = hit.dist;
+    }
     
-    vec3 sphere_color = vec3(1.0, 0.0, 0.0) * cos_angle;
-    return vec4(sphere_color, 1.0);
+    return color;
 }
 
 void main()
 {
-    vec4 pixel = vec4(0.0);
     ivec2 coord = ivec2(gl_GlobalInvocationID.xy);
     ivec2 resolution = imageSize(screen);
+    vec2 uv = (coord - 0.5 * resolution) / resolution.y;
 
-    vec2 uv = (coord * 2.0 - resolution.xy) / resolution.y;
-    pixel = trace_sphere(uv);
+    Ray ray;
+    ray.origin = u_CameraPosition;
+    ray.direction = normalize(vec3(uv, -1.0));
+
+    vec3 color = trace_ray(ray);
+    vec4 pixel = vec4(color, 1.0);
     imageStore(screen, coord, pixel);
 }
