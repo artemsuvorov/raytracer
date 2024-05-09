@@ -17,8 +17,12 @@ public:
     void Bind() const;
     void Unbind() const;
 
-    void SetUniform(const std::string& name, int32_t value);
+    void SetUniform(const std::string& name, uint32_t value);
     void SetUniform(const std::string& name, float value);
+    void SetUniform(const std::string& name, const glm::vec2& value);
+    void SetUniform(const std::string& name, const glm::vec3& value);
+    void SetUniform(const std::string& name, const glm::vec4& value);
+    void SetUniform(const std::string& name, const glm::mat4& value);
 
 private:
     uint32_t m_Id;

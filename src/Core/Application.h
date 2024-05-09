@@ -7,6 +7,7 @@ namespace Core {
 // Forwards.
 class Window;
 class Layer;
+class Event;
 
 // Application class that setups a window and runs the main loop.
 class Application final
@@ -20,6 +21,8 @@ public:
 
     void PushLayer(Layer* layer);
     void Start();
+
+    void OnEvent(Event& event);
 
     const Window& GetWindow() const { return *m_Window; }
 

@@ -1,6 +1,11 @@
 #include "Precompiled.h"
 #include "Window.h"
 
+#include "Event/Event.h"
+#include "Event/ApplicationEvent.h"
+#include "Event/MouseEvent.h"
+#include "Event/KeyEvent.h"
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -10,7 +15,7 @@ using namespace Core;
 
 static uint8_t s_WindowCount = 0u;
 
-Window::Window(const WindowParams& params) : m_Size(params.Width, params.Height)
+Window::Window(const WindowParams& params)
 {
     Init(params);
 }
@@ -33,6 +38,10 @@ void Window::Update()
 
 void Window::Init(const WindowParams& params)
 {
+    m_Data.Title = params.Title;
+    m_Data.Width = params.Width;
+    m_Data.Height = params.Height;
+
     if (s_WindowCount == 0u)
     {
         const bool initialized = glfwInit();
@@ -53,7 +62,58 @@ void Window::Init(const WindowParams& params)
 
 	glfwSwapInterval(true);
     glViewport(0, 0, params.Width, params.Height);
+	
+    glfwSetWindowUserPointer(m_Handle, &m_Data);
     
+    // Set GLFW callbacks.
+    glfwSetMouseButtonCallback(m_Handle, [](GLFWwindow* window, int button, int action, int mods)
+    {
+        WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+        switch (action)
+        {
+            case GLFW_PRESS:
+            {
+                MouseButtonPressedEvent event(button);
+                data.EventCallback(event);
+                break;
+            }
+            case GLFW_RELEASE:
+            {
+                MouseButtonReleasedEvent event(button);
+                data.EventCallback(event);
+                break;
+            }
+        }
+    });
+    
+    glfwSetKeyCallback(m_Handle, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+    {
+        WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+        switch (action)
+        {
+            case GLFW_PRESS:
+            {
+                KeyPressedEvent event(key, 0);
+                data.EventCallback(event);
+                break;
+            }
+            case GLFW_RELEASE:
+            {
+                KeyReleasedEvent event(key);
+                data.EventCallback(event);
+                break;
+            }
+            case GLFW_REPEAT:
+            {
+                KeyPressedEvent event(key, true);
+                data.EventCallback(event);
+                break;
+            }
+        }
+    });
+
     const uint32_t status = glewInit();
     assert(status == GLEW_OK && "Failed to initialize GLEW!");
 }

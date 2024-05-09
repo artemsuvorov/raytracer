@@ -4,6 +4,8 @@
 #include "Window.h"
 #include "Layer.h"
 
+#include "Event/Event.h"
+
 #include "Renderer/Renderer.h"
 
 using namespace Core;
@@ -17,6 +19,7 @@ Application::Application(const char* title)
 
     const WindowParams params{title, 1200u, 800u};
     m_Window = std::make_unique<Window>(params);
+    m_Window->SetEventCallback(BIND_FN(Application::OnEvent));
     GraphicsContext::LogInfo();
 
     Renderer::Init();
@@ -55,5 +58,15 @@ void Application::Start()
             layer->OnUpdate();
 
         m_Window->Update();
+    }
+}
+
+void Application::OnEvent(Event& event)
+{
+    for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)
+    {
+        if (event.Handled) 
+            break;
+        (*it)->OnEvent(event);
     }
 }
