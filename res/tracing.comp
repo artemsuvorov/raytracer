@@ -3,30 +3,40 @@
 layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
 layout(rgba32f, binding = 0) uniform image2D screen;
 
+uniform vec3 u_Camera;
+
+vec4 trace_sphere(vec2 uv)
+{
+    vec3 ray_origin = vec3(0.0, 0.0, 1.0) - u_Camera;
+    vec3 ray_direction = normalize(vec3(uv, -1.0));
+    float radius = 0.5;
+        
+    float a = dot(ray_direction, ray_direction);
+    float b = 2.0 * dot(ray_origin, ray_direction);
+    float c = dot(ray_origin, ray_origin) - radius * radius;
+    
+    float discriminant = b * b - 4.0 * a * c;
+    if (discriminant < 0.0)
+        return vec4(0.0);
+    
+    float t1 = (-b - sqrt(discriminant)) / (2.0 * a);
+    vec3 hit_position = ray_origin + ray_direction * t1;
+    vec3 normal = normalize(hit_position);
+    
+    vec3 light_direction = normalize(vec3(-1.0, -1.0, -1.0));
+    float cos_angle = dot(normal, -light_direction);
+    
+    vec3 sphere_color = vec3(1.0, 0.0, 0.0) * cos_angle;
+    return vec4(sphere_color, 1.0);
+}
+
 void main()
 {
-    vec4 pixel = vec4(0.075, 0.133, 0.173, 1.0);
-    ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
-    
+    vec4 pixel = vec4(0.0);
+    ivec2 coord = ivec2(gl_GlobalInvocationID.xy);
     ivec2 resolution = imageSize(screen);
-    vec2 uv = (pixel_coords * 2.0 - resolution.xy) / resolution.y;
 
-    float fov = 90.0;
-    vec3 cam_o = vec3(0.0, 0.0, -tan(fov / 2.0));
-    vec3 ray_o = vec3(-uv, 0.0);
-    vec3 ray_d = normalize(ray_o - cam_o);
-
-    vec3 sphere_c = vec3(0.0, 0.0, -5.0);
-    float sphere_r = 1.0;
-
-    vec3 o_c = ray_o - sphere_c;
-    float b = dot(ray_d, o_c);
-    float c = dot(o_c, o_c) - sphere_r * sphere_r;
-    float intersectionState = b * b - c;
-    vec3 intersection = ray_o + ray_d * (-b + sqrt(b * b - c));
-
-    if (intersectionState >= 0.0)
-        pixel = vec4((normalize(intersection - sphere_c) + 1.0) / 2.0, 1.0);
-
-    imageStore(screen, pixel_coords, pixel);
+    vec2 uv = (coord * 2.0 - resolution.xy) / resolution.y;
+    pixel = trace_sphere(uv);
+    imageStore(screen, coord, pixel);
 }
