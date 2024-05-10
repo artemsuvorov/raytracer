@@ -78,9 +78,13 @@ void EditorLayer::OnAttach()
     m_SceneBuffer->SetBinding(1);
 }
 
-void EditorLayer::OnUpdate()
+void EditorLayer::OnUpdate(Timestep dt)
 {
     Renderer::Clear(0x222222FF);
+
+#ifndef NDEBUG // For debugging purposes only.
+    std::cout << 1.0f / dt << std::endl;
+#endif
 
     m_ComputeShader->Bind();
     m_ComputeShader->SetUniform("u_CameraPosition", m_CameraPosition);

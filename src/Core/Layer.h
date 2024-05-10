@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Time.h"
+
 namespace Core {
 
 // Forwards.
@@ -15,8 +17,7 @@ public:
 public:
     virtual void OnAttach() {}
     virtual void OnDetach() {}
-    // TODO: Add DeltaTime parameter.
-    virtual void OnUpdate() {}
+    virtual void OnUpdate(Timestep dt) {}
     virtual void OnEvent(Event& event) {}
 };
 

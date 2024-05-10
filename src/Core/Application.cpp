@@ -3,6 +3,7 @@
 #include "Color.h"
 #include "Window.h"
 #include "Layer.h"
+#include "Time.h"
 
 #include "Event/Event.h"
 
@@ -52,10 +53,12 @@ void Application::Start()
 {
     while (m_Window->IsOpen())
     {
-        Renderer::Clear(0x222222FF);
+        double time = Time::GetTime();
+        Timestep timestep = time - m_LastFrameTime;
+        m_LastFrameTime = time;
 
         for (Layer* layer : m_LayerStack)
-            layer->OnUpdate();
+            layer->OnUpdate(timestep);
 
         m_Window->Update();
     }

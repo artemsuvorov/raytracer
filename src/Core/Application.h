@@ -29,6 +29,8 @@ public:
 private:
     std::unique_ptr<Window> m_Window;
     std::vector<Layer*> m_LayerStack;
+
+    double m_LastFrameTime = 0.0;
 };
 
 }

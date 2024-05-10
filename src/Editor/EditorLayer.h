@@ -27,7 +27,7 @@ public:
 
 public:
     virtual void OnAttach() override;
-    virtual void OnUpdate() override;
+    virtual void OnUpdate(Core::Timestep dt) override;
     virtual void OnEvent(Core::Event& event) override;
 
 private:
