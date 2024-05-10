@@ -71,8 +71,9 @@ void Shader::SetUniform(const std::string& name, const glm::mat4& value)
 int32_t Shader::FindUniform(const std::string& name)
 {
     const int32_t location = glGetUniformLocation(m_Id, name.c_str());
-    //if (location < 0)
-    //    std::cerr << "Could not find uniform '" << name << "' in Shader " << m_Id << ".\n";
+    if (location < 0)
+       std::cerr << "Could not find uniform '" << name << "' in Shader " << m_Id << ".\n";
+    assert(location >= 0 && "Could not find uniform in Shader.");
     return location;
 }
 

@@ -38,7 +38,7 @@ private:
     const Core::Window& m_Window;
     Scene m_Scene;
 
-    glm::vec3 m_CameraPosition {0.0f, 0.0f, 1.0f};
+    glm::vec3 m_CameraPosition {0.0f, 0.0f, 2.0f};
 
     std::shared_ptr<Core::VertexArray> m_VertexArray;
     std::shared_ptr<Core::UniformBuffer> m_SceneBuffer;
