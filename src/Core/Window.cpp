@@ -60,7 +60,7 @@ void Window::Init(const WindowParams& params)
     
     glfwMakeContextCurrent(m_Handle);
 
-	glfwSwapInterval(true);
+	glfwSwapInterval(false);
     glViewport(0, 0, params.Width, params.Height);
 	
     glfwSetWindowUserPointer(m_Handle, &m_Data);
