@@ -37,6 +37,8 @@ public:
 		return glm::vec2(m_Data.Width, m_Data.Height);
 	}
 
+	GLFWwindow* GetHandle() const { return m_Handle; }
+
 private:
 	void Init(const WindowParams& params);
 	void Shutdown();

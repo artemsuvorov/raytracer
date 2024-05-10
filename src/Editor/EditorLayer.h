@@ -28,11 +28,9 @@ public:
 public:
     virtual void OnAttach() override;
     virtual void OnUpdate(Core::Timestep dt) override;
-    virtual void OnEvent(Core::Event& event) override;
 
 private:
-    bool OnKeyPressed(Core::KeyPressedEvent& event);
-    bool OnMouseButtonPressed(Core::MouseButtonPressedEvent& event);
+    void UpdateCamera(Core::Timestep dt);
 
 private:
     const Core::Window& m_Window;

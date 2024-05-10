@@ -80,6 +80,7 @@ void EditorLayer::OnAttach()
 
 void EditorLayer::OnUpdate(Timestep dt)
 {
+    UpdateCamera(dt);
     Renderer::Clear(0x222222FF);
 
 #ifndef NDEBUG // For debugging purposes only.
@@ -98,32 +99,17 @@ void EditorLayer::OnUpdate(Timestep dt)
     Renderer::DrawIndexed(m_VertexArray);
 }
 
-void EditorLayer::OnEvent(Event& event)
-{
-    EventDispatcher dispatcher(event);
-    dispatcher.Dispatch<KeyPressedEvent>(BIND_FN(EditorLayer::OnKeyPressed));
-    dispatcher.Dispatch<MouseButtonPressedEvent>(BIND_FN(EditorLayer::OnMouseButtonPressed));
-}
-
-bool EditorLayer::OnKeyPressed(KeyPressedEvent& event)
+void EditorLayer::UpdateCamera(Timestep dt)
 {
     glm::vec3 direction = glm::vec3(0.0f);
 
-    const KeyCode keycode = event.GetKeyCode();
-    direction.z = (keycode == Key::W) - (keycode == Key::S);
-    direction.x = (keycode == Key::A) - (keycode == Key::D);
-    direction.y = (keycode == Key::LeftShift) - (keycode == Key::Space);
+    direction.z = (Input::IsKeyPressed(Key::W)) - (Input::IsKeyPressed(Key::S));
+    direction.x = (Input::IsKeyPressed(Key::A)) - (Input::IsKeyPressed(Key::D));
+    direction.y = (Input::IsKeyPressed(Key::LeftShift)) - (Input::IsKeyPressed(Key::Space));
 
     if (glm::dot(direction, direction) > 0e-25f)
         direction = -1.0f * glm::normalize(direction);
 
-    constexpr static const float kSpeed = 0.05f;
-    m_CameraPosition += kSpeed * direction;
-
-    return false;
-}
-
-bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& event)
-{
-    return false;
+    constexpr static const float kSpeed = 4.0f;
+    m_CameraPosition += kSpeed * direction * float(dt);
 }
