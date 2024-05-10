@@ -16,7 +16,8 @@ public:
     {
     }
 
-    operator double() const { return m_Time; }
+    operator float() const { return m_Time; }
+    explicit operator double() const { return m_Time; }
 
     double GetSeconds() const { return m_Time; }
     double GetMilliseconds() const { return m_Time * 1000.0; }

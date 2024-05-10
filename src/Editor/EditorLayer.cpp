@@ -111,5 +111,5 @@ void EditorLayer::UpdateCamera(Timestep dt)
         direction = -1.0f * glm::normalize(direction);
 
     constexpr static const float kSpeed = 4.0f;
-    m_CameraPosition += kSpeed * direction * float(dt);
+    m_CameraPosition += dt * kSpeed * direction;
 }
