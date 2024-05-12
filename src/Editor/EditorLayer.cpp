@@ -23,22 +23,18 @@ using namespace Editor;
 EditorLayer::EditorLayer() : m_Window(Application::Get().GetWindow())
 {
     Sphere sphere1;
-    sphere1.Position = glm::vec3(0.5f, -0.5f, 0.0f);
-    sphere1.Radius = 0.5f;
-    sphere1.Albedo = glm::vec3(1.0f, 0.0f, 0.0f);
+    sphere1.Position = glm::vec3(0.0f, 0.0f, -1.0f);
+    sphere1.Radius = 1.0f;
+    sphere1.Material.Albedo = glm::vec3(1.0f, 0.0f, 1.0f);
+    sphere1.Material.Roughness = 0.1f;
     m_Scene.Spheres.push_back(sphere1);
 
     Sphere sphere2;
-    sphere2.Position = glm::vec3(-2.0f, 0.0f, -3.0f);
-    sphere2.Radius = 2.0f;
-    sphere2.Albedo = glm::vec3(0.0f, 0.0f, 1.0f);
+    sphere2.Position = glm::vec3(0.0f, -101.0f, -1.0f);
+    sphere2.Radius = 100.0f;
+    sphere2.Material.Albedo = glm::vec3(0.0f, 0.0f, 1.0f);
+    sphere2.Material.Roughness = 1.0f;
     m_Scene.Spheres.push_back(sphere2);
-
-    Sphere sphere3;
-    sphere3.Position = glm::vec3(1.5f, 1.0f, -2.0f);
-    sphere3.Radius = 1.0f;
-    sphere3.Albedo = glm::vec3(0.0f, 1.0f, 0.0f);
-    m_Scene.Spheres.push_back(sphere3);
 }
 
 void EditorLayer::OnAttach()
@@ -83,11 +79,11 @@ void EditorLayer::OnUpdate(Timestep dt)
     UpdateCamera(dt);
     Renderer::Clear(0x222222FF);
 
-#ifndef NDEBUG // For debugging purposes only.
-    std::cout << 1.0f / dt << std::endl;
-#endif
+    if (false) // For debugging purposes only.
+        std::cout << 1.0f / dt << std::endl;
 
     m_ComputeShader->Bind();
+    m_ComputeShader->SetUniform("u_FrameIndex", glm::vec2(++m_FrameIndex, 0.0f));
     m_ComputeShader->SetUniform("u_CameraPosition", m_CameraPosition);
     Renderer::DispatchCompute(ceil(m_Window.GetSize().x / 8), ceil(m_Window.GetSize().y / 4));
 

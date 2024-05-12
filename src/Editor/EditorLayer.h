@@ -35,6 +35,7 @@ private:
 private:
     const Core::Window& m_Window;
     Scene m_Scene;
+    uint32_t m_FrameIndex = 0u;
 
     glm::vec3 m_CameraPosition {0.0f, 0.0f, 2.0f};
 

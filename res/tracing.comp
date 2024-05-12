@@ -4,21 +4,52 @@ layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
 layout(rgba32f, binding = 0) uniform image2D screen;
 
 #define MAX_DISTANCE 1000.0
-#define MAX_SIZE     16
-#define MAX_BOUNCES  2
+#define MAX_SIZE     16u
+#define MAX_BOUNCES  5u
+
+uint pcg_hash(uint seed)
+{
+    uint state = seed * 747796405u + 2891336453u;
+    uint word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
+    return (word >> 22u) ^ word;
+}
+
+float random_float(inout uint seed)
+{
+    seed = pcg_hash(seed);
+    return float(seed) / float(0xffffffffu);
+}
+
+vec3 random_vec3(inout uint seed)
+{
+    return normalize(vec3(
+        random_float(seed) * 2.0 - 1.0,
+        random_float(seed) * 2.0 - 1.0,
+        random_float(seed) * 2.0 - 1.0
+    ));
+}
 
 struct Ray
 {
     vec3 origin, direction;
 };
 
+struct Material
+{
+    vec3 albedo;
+    float roughness;
+    float metallic;
+};
+
 struct Sphere
 {
     vec3 origin;
     float radius;
-    vec3 albedo;
+    Material material;
 };
 
+// For some goddamn reason i cannot assing an uint uniform but a vec only...
+uniform vec2 u_FrameIndex;
 uniform vec3 u_CameraPosition;
 
 layout (std140, binding = 1) uniform u_SphereBlock {
@@ -29,7 +60,7 @@ struct Hit
 {
     float dist;
     vec3 position, normal;
-    vec3 material_albedo;
+    Material material;
 };
 
 Hit closest(Ray ray, float dist, Sphere sphere)
@@ -38,7 +69,7 @@ Hit closest(Ray ray, float dist, Sphere sphere)
     hit.dist = dist;
     hit.position = ray.origin + ray.direction * dist;
     hit.normal = normalize(hit.position - sphere.origin);
-    hit.material_albedo = sphere.albedo;
+    hit.material = sphere.material;
     return hit;
 }
 
@@ -63,7 +94,7 @@ Hit trace_ray(Ray ray)
     Hit closest_hit;
     closest_hit.dist = MAX_DISTANCE;
     
-    for (int i = 0; i < MAX_SIZE; i++)
+    for (uint i = 0u; i < MAX_SIZE; i++)
     {
         float dist = intersect_sphere(ray, spheres[i]);
         if (dist > 0.0 && dist < closest_hit.dist)
@@ -73,8 +104,12 @@ Hit trace_ray(Ray ray)
     return closest_hit;
 }
 
-vec4 per_pixel(vec2 uv)
+vec4 per_pixel(vec2 coord)
 {
+    vec2 resolution = imageSize(screen);
+    vec2 uv = (coord.xy - 0.5 * resolution.xy) / resolution.y;
+    uint seed = uint(coord.x + coord.y * resolution.x) * uint(u_FrameIndex);
+
     Ray ray;
     ray.origin = u_CameraPosition;
     ray.direction = normalize(vec3(uv, -1.0));
@@ -82,22 +117,25 @@ vec4 per_pixel(vec2 uv)
     vec3 color = vec3(0.0);
     float multiplier = 1.0;
     
-    for (int i = 0; i < MAX_BOUNCES; i++)
+    for (uint i = 0u; i < MAX_BOUNCES; i++)
     {
         Hit hit = trace_ray(ray);
         if (hit.dist >= MAX_DISTANCE)
         {
-            color += vec3(0.0, 0.0, 0.0) * multiplier;
+            vec3 sky_color = vec3(0.6, 0.7, 0.9);
+            color += sky_color * multiplier;
             break;
         }
         
         vec3 light_direction = normalize(vec3(-1.0, -1.0, -1.0));
         float light_intensity = max(0.0, dot(hit.normal, -light_direction));
-        color += hit.material_albedo * light_intensity * multiplier;
-        multiplier *= 0.7;
+        color += hit.material.albedo * light_intensity * multiplier;
+        multiplier *= 0.5;
         
+        seed += i;
         ray.origin = hit.position + hit.normal * 0.0001;
-        ray.direction = reflect(ray.direction, hit.normal);
+        ray.direction = reflect(ray.direction,
+           normalize(hit.normal + hit.material.roughness * random_vec3(seed)));
     }
     
     return vec4(color, 1.0);
@@ -106,8 +144,6 @@ vec4 per_pixel(vec2 uv)
 void main()
 {
     ivec2 coord = ivec2(gl_GlobalInvocationID.xy);
-    ivec2 resolution = imageSize(screen);
-    vec2 uv = (coord - 0.5 * resolution) / resolution.y;
-    vec4 pixel = per_pixel(uv);
+    vec4 pixel = per_pixel(coord.xy);
     imageStore(screen, coord, pixel);
 }
