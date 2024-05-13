@@ -26,7 +26,7 @@ EditorLayer::EditorLayer() : m_Window(Application::Get().GetWindow())
     sphere.Position = glm::vec3(0.0f, -0.5f, -1.0f);
     sphere.Radius = 0.5f;
     sphere.Material.Albedo = glm::vec3(0.0f, 0.0f, 1.0f);
-    sphere.Material.Roughness = 1.0f;
+    sphere.Material.Roughness = 0.2f;
     m_Scene.Spheres.push_back(sphere);
 
     Sphere leftWall;

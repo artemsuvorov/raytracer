@@ -5,8 +5,8 @@ layout(rgba32f, binding = 0) uniform image2D screen;
 
 #define MAX_DISTANCE 1000.0
 #define MAX_SIZE     16u
-#define MAX_BOUNCES  5u
-#define SAMPLE_SIZE  1u
+#define MAX_BOUNCES  4u
+#define SAMPLE_SIZE  10u
 
 uint pcg_hash(uint seed)
 {
