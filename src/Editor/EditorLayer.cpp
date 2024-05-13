@@ -22,19 +22,55 @@ using namespace Editor;
 
 EditorLayer::EditorLayer() : m_Window(Application::Get().GetWindow())
 {
-    Sphere sphere1;
-    sphere1.Position = glm::vec3(0.0f, 0.0f, -1.0f);
-    sphere1.Radius = 1.0f;
-    sphere1.Material.Albedo = glm::vec3(1.0f, 0.0f, 1.0f);
-    sphere1.Material.Roughness = 0.1f;
-    m_Scene.Spheres.push_back(sphere1);
+    Sphere sphere;
+    sphere.Position = glm::vec3(0.0f, -0.5f, -1.0f);
+    sphere.Radius = 0.5f;
+    sphere.Material.Albedo = glm::vec3(0.0f, 0.0f, 1.0f);
+    sphere.Material.Roughness = 1.0f;
+    m_Scene.Spheres.push_back(sphere);
 
-    Sphere sphere2;
-    sphere2.Position = glm::vec3(0.0f, -101.0f, -1.0f);
-    sphere2.Radius = 100.0f;
-    sphere2.Material.Albedo = glm::vec3(0.0f, 0.0f, 1.0f);
-    sphere2.Material.Roughness = 1.0f;
-    m_Scene.Spheres.push_back(sphere2);
+    Sphere leftWall;
+    leftWall.Position = glm::vec3(-101.5f, 0.0f, -1.0f);
+    leftWall.Radius = 100.0f;
+    leftWall.Material.Albedo = glm::vec3(1.0f, 0.0f, 0.0f);
+    leftWall.Material.Roughness = 1.0f;
+    m_Scene.Spheres.push_back(leftWall);
+
+    Sphere rightWall;
+    rightWall.Position = glm::vec3(101.5f, 0.0f, -1.0f);
+    rightWall.Radius = 100.0f;
+    rightWall.Material.Albedo = glm::vec3(0.0f, 1.0f, 0.0f);
+    rightWall.Material.Roughness = 1.0f;
+    m_Scene.Spheres.push_back(rightWall);
+
+    Sphere backWall;
+    backWall.Position = glm::vec3(0.0f, 0.0f, -102.5f);
+    backWall.Radius = 100.0f;
+    backWall.Material.Albedo = glm::vec3(1.0f, 1.0f, 1.0f);
+    backWall.Material.Roughness = 1.0f;
+    m_Scene.Spheres.push_back(backWall);
+
+    // Sphere ceiling;
+    // ceiling.Position = glm::vec3(0.0f, 101.0f, -1.0f);
+    // ceiling.Radius = 100.0f;
+    // ceiling.Material.Albedo = glm::vec3(1.0f, 1.0f, 1.0f);
+    // ceiling.Material.Roughness = 1.0f;
+    // m_Scene.Spheres.push_back(ceiling);
+
+    Sphere floor;
+    floor.Position = glm::vec3(0.0f, -101.0f, -1.0f);
+    floor.Radius = 100.0f;
+    floor.Material.Albedo = glm::vec3(1.0f, 1.0f, 1.0f);
+    floor.Material.Roughness = 1.0f;
+    m_Scene.Spheres.push_back(floor);
+
+    Sphere light;
+    light.Position = glm::vec3(0.0f, 0.7f, 0.8f);
+    light.Radius = 0.2f;
+    light.Material.Albedo = glm::vec3(0.8f, 0.7f, 0.2f);
+    light.Material.Roughness = 1.0f;
+    light.Material.Emission = 3.0f;
+    m_Scene.Spheres.push_back(light);
 }
 
 void EditorLayer::OnAttach()
@@ -79,8 +115,8 @@ void EditorLayer::OnUpdate(Timestep dt)
     UpdateCamera(dt);
     Renderer::Clear(0x222222FF);
 
-    if (false) // For debugging purposes only.
-        std::cout << 1.0f / dt << std::endl;
+    // if (false) // For debugging purposes only.
+    //     std::cout << 1.0f / dt << std::endl;
 
     m_ComputeShader->Bind();
     m_ComputeShader->SetUniform("u_FrameIndex", glm::vec2(++m_FrameIndex, 0.0f));

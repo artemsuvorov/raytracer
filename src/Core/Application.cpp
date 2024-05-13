@@ -18,7 +18,7 @@ Application::Application(const char* title)
     assert(!s_ApplicationInstance && "Application already exists.");
     s_ApplicationInstance = this;
 
-    const WindowParams params{title, 1200u, 800u};
+    const WindowParams params{title, 600, 600};
     m_Window = std::make_unique<Window>(params);
     m_Window->SetEventCallback(BIND_FN(Application::OnEvent));
     GraphicsContext::LogInfo();
