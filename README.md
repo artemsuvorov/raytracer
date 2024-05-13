@@ -3,6 +3,8 @@
 It is a 3D renderer with ray tracing support, written in C++ and OpenGL from scratch.
 Ray tracing is a common technique for generating photo-realistic digital imagery.
 
+![cornell-sim](https://github.com/artemsuvorov/raytracer/assets/48320664/694799a0-22c9-42d5-97c0-11a0f23d31fb)
+
 
 ## Quick Start
 
