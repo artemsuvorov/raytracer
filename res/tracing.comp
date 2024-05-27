@@ -5,8 +5,8 @@ layout(rgba32f, binding = 0) uniform image2D screen;
 
 #define MAX_DISTANCE 1000.0
 #define MAX_SIZE     16u
-#define MAX_BOUNCES  4u
-#define SAMPLE_SIZE  10u
+#define MAX_BOUNCES  3u
+#define SAMPLE_SIZE  4u
 
 uint pcg_hash(uint seed)
 {
@@ -153,6 +153,6 @@ void main()
     for (uint i = 0u; i < SAMPLE_SIZE; i++)
         pixel += per_pixel(coord.xy, uint(u_FrameIndex.x) + i);
     pixel /= float(SAMPLE_SIZE);
-    pixel.xyz = gamma_correction(pixel.xyz, 0.35);
+    pixel.xyz = gamma_correction(pixel.xyz, 0.5);
     imageStore(screen, coord, pixel);
 }

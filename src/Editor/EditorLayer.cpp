@@ -29,34 +29,6 @@ EditorLayer::EditorLayer() : m_Window(Application::Get().GetWindow())
     sphere.Material.Roughness = 0.2f;
     m_Scene.Spheres.push_back(sphere);
 
-    Sphere leftWall;
-    leftWall.Position = glm::vec3(-101.5f, 0.0f, -1.0f);
-    leftWall.Radius = 100.0f;
-    leftWall.Material.Albedo = glm::vec3(1.0f, 0.0f, 0.0f);
-    leftWall.Material.Roughness = 1.0f;
-    m_Scene.Spheres.push_back(leftWall);
-
-    Sphere rightWall;
-    rightWall.Position = glm::vec3(101.5f, 0.0f, -1.0f);
-    rightWall.Radius = 100.0f;
-    rightWall.Material.Albedo = glm::vec3(0.0f, 1.0f, 0.0f);
-    rightWall.Material.Roughness = 1.0f;
-    m_Scene.Spheres.push_back(rightWall);
-
-    Sphere backWall;
-    backWall.Position = glm::vec3(0.0f, 0.0f, -102.5f);
-    backWall.Radius = 100.0f;
-    backWall.Material.Albedo = glm::vec3(1.0f, 1.0f, 1.0f);
-    backWall.Material.Roughness = 1.0f;
-    m_Scene.Spheres.push_back(backWall);
-
-    // Sphere ceiling;
-    // ceiling.Position = glm::vec3(0.0f, 101.0f, -1.0f);
-    // ceiling.Radius = 100.0f;
-    // ceiling.Material.Albedo = glm::vec3(1.0f, 1.0f, 1.0f);
-    // ceiling.Material.Roughness = 1.0f;
-    // m_Scene.Spheres.push_back(ceiling);
-
     Sphere floor;
     floor.Position = glm::vec3(0.0f, -101.0f, -1.0f);
     floor.Radius = 100.0f;
@@ -65,7 +37,7 @@ EditorLayer::EditorLayer() : m_Window(Application::Get().GetWindow())
     m_Scene.Spheres.push_back(floor);
 
     Sphere light;
-    light.Position = glm::vec3(0.0f, 0.7f, 0.8f);
+    light.Position = glm::vec3(0.0f, 0.5f, -2.0f);
     light.Radius = 0.2f;
     light.Material.Albedo = glm::vec3(0.8f, 0.7f, 0.2f);
     light.Material.Roughness = 1.0f;
