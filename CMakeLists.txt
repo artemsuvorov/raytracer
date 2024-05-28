@@ -28,3 +28,14 @@ target_link_libraries(
 
 find_package(OpenGL REQUIRED)
 target_link_libraries(${CMAKE_PROJECT_NAME} OpenGL::GL)
+
+# Firstly, you're gonna need to install the imgui lib itself:
+# cd ./lib/imgui
+# cmake -S . -B build/ -G "MinGW Makefiles"
+# cmake --build .\build\ --config debug --target install
+# TODO: I will fix this abomination, I promise.
+
+set(ImGui_DIR "lib/imgui/build/dist/lib/cmake")
+list(APPEND CMAKE_PREFIX_PATH ${ImGui_DIR})
+find_package(ImGui CONFIG REQUIRED)
+target_link_libraries(${CMAKE_PROJECT_NAME} ImGui::imgui)

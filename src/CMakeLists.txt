@@ -7,6 +7,7 @@ aux_source_directory(Core SOURCES)
 aux_source_directory(Editor SOURCES)
 aux_source_directory(Event SOURCES)
 aux_source_directory(Renderer SOURCES)
+aux_source_directory(UI SOURCES)
 
 add_executable(
     ${CMAKE_PROJECT_NAME}
