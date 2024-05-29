@@ -13,7 +13,10 @@ class ImguiLayer : public Layer
 public:
     virtual void OnAttach() override;
     virtual void OnDetach() override;
-    virtual void OnUpdate(Timestep dt) override;
+    
+    void Begin();
+    void End();
+
     virtual void OnEvent(Event& event) override;
 
 private:

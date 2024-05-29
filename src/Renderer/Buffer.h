@@ -50,6 +50,7 @@ public:
     ~UniformBuffer();
 
     void SetBinding(uint32_t bindingIndex) const;
+    void SetData(const void* data, uint32_t size) const;
 
 private:
     uint32_t m_Id = 0;

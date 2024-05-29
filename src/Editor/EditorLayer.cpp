@@ -15,7 +15,7 @@
 
 #include <math.h>
 #include <iostream>
-#include <GL/glew.h>
+#include <imgui/imgui.h>
 
 using namespace Core;
 using namespace Editor;
@@ -87,8 +87,7 @@ void EditorLayer::OnUpdate(Timestep dt)
     UpdateCamera(dt);
     Renderer::Clear(0x222222FF);
 
-    // if (false) // For debugging purposes only.
-    //     std::cout << 1.0f / dt << std::endl;
+    m_SceneBuffer->SetData(&m_Scene.Spheres.front(), sizeof(Sphere) * m_Scene.Spheres.size());
 
     m_ComputeShader->Bind();
     m_ComputeShader->SetUniform("u_FrameIndex", glm::vec2(++m_FrameIndex, 0.0f));
@@ -101,6 +100,35 @@ void EditorLayer::OnUpdate(Timestep dt)
     m_Texture->Bind(0);
 
     Renderer::DrawIndexed(m_VertexArray);
+}
+
+void EditorLayer::OnImgui(Timestep dt)
+{
+    if (ImGui::Begin("Debug"))
+    {
+        ImGui::Text("FPS: %0.3f", 1.0f / (float)dt);
+        ImGui::Text("Delta Time: %0.3f", (float)dt);
+
+        uint32_t id = 0;
+        for (Sphere& sphere : m_Scene.Spheres)
+        {
+            ImGui::PushID(id++);
+            ImGui::SeparatorText("Sphere");
+            ImGui::DragFloat3("Position", glm::value_ptr(sphere.Position), 0.5f);
+            ImGui::DragFloat("Radius", &sphere.Radius, 0.5f, 0.0f, 100.0f);
+
+            ImGui::Text("Material: ");            
+            ImGui::ColorEdit3("Albedo", glm::value_ptr(sphere.Material.Albedo));
+            ImGui::DragFloat("Roughness", &sphere.Material.Roughness, 0.01f, 0.0f, 1.0f);
+            ImGui::DragFloat("Metallic", &sphere.Material.Metallic, 0.01f, 0.0f, 1.0f);
+            ImGui::DragFloat("Emission", &sphere.Material.Emission, 0.01f, 0.0f, 10.0f);
+
+            ImGui::Spacing();
+            ImGui::PopID();
+        }
+
+        ImGui::End();
+    }
 }
 
 void EditorLayer::UpdateCamera(Timestep dt)

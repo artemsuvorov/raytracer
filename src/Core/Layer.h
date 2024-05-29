@@ -18,6 +18,7 @@ public:
     virtual void OnAttach() {}
     virtual void OnDetach() {}
     virtual void OnUpdate(Timestep dt) {}
+    virtual void OnImgui(Timestep dt) {}
     virtual void OnEvent(Event& event) {}
 };
 

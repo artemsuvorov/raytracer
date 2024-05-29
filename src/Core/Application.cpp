@@ -24,6 +24,9 @@ Application::Application(const char* title)
     GraphicsContext::LogInfo();
 
     Renderer::Init();
+ 
+    m_ImguiLayer = new Core::ImguiLayer();
+    PushLayer(m_ImguiLayer);
 }
 
 Application::~Application()
@@ -59,6 +62,11 @@ void Application::Start()
 
         for (Layer* layer : m_LayerStack)
             layer->OnUpdate(timestep);
+
+        m_ImguiLayer->Begin();
+        for (Layer* layer : m_LayerStack)
+            layer->OnImgui(timestep);
+        m_ImguiLayer->End();
 
         m_Window->Update();
     }

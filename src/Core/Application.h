@@ -2,6 +2,8 @@
 
 #include "Precompiled.h"
 
+#include "UI/ImGuiLayer.h"
+
 namespace Core {
 
 // Forwards.
@@ -29,6 +31,8 @@ public:
 private:
     std::unique_ptr<Window> m_Window;
     std::vector<Layer*> m_LayerStack;
+
+    ImguiLayer* m_ImguiLayer;
 
     double m_LastFrameTime = 0.0;
 };

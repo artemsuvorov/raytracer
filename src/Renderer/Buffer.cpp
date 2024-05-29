@@ -89,3 +89,10 @@ void UniformBuffer::SetBinding(uint32_t bindingIndex) const
 {
     glBindBufferBase(GL_UNIFORM_BUFFER, bindingIndex, m_Id);
 }
+
+void UniformBuffer::SetData(const void* data, uint32_t size) const
+{
+    glBindBuffer(GL_UNIFORM_BUFFER, m_Id);
+    glBufferData(GL_UNIFORM_BUFFER, size, data, GL_STATIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}

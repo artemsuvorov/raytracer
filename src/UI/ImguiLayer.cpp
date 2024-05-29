@@ -35,7 +35,7 @@ void ImguiLayer::OnDetach()
     ImGui::DestroyContext();
 }
 
-void ImguiLayer::OnUpdate(Timestep dt)
+void ImguiLayer::Begin()
 {
     const glm::vec2 size = Application::Get().GetWindow().GetSize();
     ImGuiIO& io = ImGui::GetIO();
@@ -43,14 +43,10 @@ void ImguiLayer::OnUpdate(Timestep dt)
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui::NewFrame();
+}
 
-    if (ImGui::Begin("Debug"))
-    {
-        ImGui::Text("FPS: %0.3f", 1.0f / (float)dt);
-        ImGui::Text("Delta Time: %0.3f", (float)dt);
-        ImGui::End();
-    }
-
+void ImguiLayer::End()
+{
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

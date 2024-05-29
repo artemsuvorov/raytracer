@@ -28,6 +28,7 @@ public:
 public:
     virtual void OnAttach() override;
     virtual void OnUpdate(Core::Timestep dt) override;
+    virtual void OnImgui(Core::Timestep dt) override;
 
 private:
     void UpdateCamera(Core::Timestep dt);
