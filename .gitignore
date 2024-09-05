@@ -79,3 +79,6 @@ build/
 
 # Extras
 *.pdf
+
+# Imgui configs
+imgui.ini
